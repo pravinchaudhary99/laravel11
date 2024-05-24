@@ -1,15 +1,9 @@
-name: Test Laravel Application
+name: Unit Tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [pull_request]
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
 
     services:
@@ -17,7 +11,7 @@ jobs:
         image: mysql:latest
         env:
           MYSQL_DATABASE: epsilon
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
         ports:
           - 3329:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -29,28 +23,10 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
-          extensions: mbstring, mysqli, pdo_mysql
-          ini-values: post_max_size=256M, upload_max_filesize=256M
-          coverage: none
+          php-version: '8.2'
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
+        run: composer install --prefer-dist --no-progress
 
-      - name: Copy .env.example to .env
-        run: cp .env.example .env
-
-      - name: Set up testing database
-        run: |
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=192.168.1.102" >> .env
-          echo "DB_PORT=3329" >> .env
-          echo "DB_DATABASE=epsilon" >> .env
-          echo "DB_USERNAME=root" >> .env
-          echo "DB_PASSWORD=wot-epsilon-test-2024" >> .env
-
-      - name: Migrate and seed database
-        run: php artisan migrate
-
-      - name: Run tests
-        run: php artisan test
+      - name: Run Pest tests
+        run: ./vendor/bin/pest
