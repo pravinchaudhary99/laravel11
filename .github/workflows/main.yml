@@ -8,14 +8,13 @@ jobs:
 
     services:
       mysql:
-        image: mysql:latest
-        env:
-          MYSQL_DATABASE: epsilon
-          MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
-        ports:
-          - 3329:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
+          image: mysql:latest
+          env:
+            MYSQL_DATABASE: epsilon
+            MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
+          ports:
+            - 3329:3306
+          options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
