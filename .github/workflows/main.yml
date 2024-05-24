@@ -1,34 +1,60 @@
-name: Unit Tests
+name: Test Laravel Application
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    tests:
-        runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-        services:
-            mysql:
-                image: mysql:latest
-                env:
-                    MYSQL_DATABASE: epsilon
-                    MYSQL_ROOT_PASSWORD: root
-                ports:
-                    - 3306:3306
-                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_DATABASE: epsilon
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3329:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-            - name: Set up PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.2'
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, mysqli, pdo_mysql
+          ini-values: post_max_size=256M, upload_max_filesize=256M
+          coverage: none
 
-            - name: Install dependencies
-              run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
 
-            - name: Run Pest tests
-              run: ./vendor/bin/pest
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
 
+      - name: Set up testing database
+        run: |
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=192.168.1.102" >> .env
+          echo "DB_PORT=3329" >> .env
+          echo "DB_DATABASE=epsilon" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=wot-epsilon-test-2024" >> .env
+          php artisan config:cache
 
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Migrate and seed database
+        run: php artisan migrate --seed --force
+
+      - name: Run tests
+        run: php artisan test
