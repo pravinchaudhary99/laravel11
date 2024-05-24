@@ -8,12 +8,14 @@ jobs:
 
     services:
       mysql:
+        container_name: mysql-test
         image: mysql:latest
+        restart: always
         env:
-          MYSQL_DATABASE: testing
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: epsilon
+          MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
         ports:
-          - 3306:3306
+          - 3329:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
