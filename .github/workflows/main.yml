@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
+        mysql:
           image: mysql:latest
           env:
             MYSQL_DATABASE: epsilon
@@ -15,17 +15,21 @@ jobs:
           ports:
             - 3329:3306
           options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        - name: Set up PHP
+          uses: shivammathur/setup-php@v2
+          with:
+            php-version: '8.2'
 
-      - name: Run Pest tests
-        run: ./vendor/bin/pest
+        - name: Install dependencies
+          run: composer install --prefer-dist --no-progress
+
+        - name: Start MySQL and sleep
+          run: docker start mysql && sleep 30m
+
+        - name: Run Pest tests
+          run: ./vendor/bin/pest
