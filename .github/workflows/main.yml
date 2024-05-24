@@ -28,10 +28,7 @@ jobs:
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress --no-suggest
 
-            - name: Create and migrate database
-              run: php artisan migrate --seed --env=testing
-
             - name: Run Pest tests
-              run: ./vendor/bin/pest --env=testing
+              run: ./vendor/bin/pest
 
 
