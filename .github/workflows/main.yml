@@ -48,13 +48,9 @@ jobs:
           echo "DB_DATABASE=epsilon" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=wot-epsilon-test-2024" >> .env
-          php artisan config:cache
-
-      - name: Generate application key
-        run: php artisan key:generate
 
       - name: Migrate and seed database
-        run: php artisan migrate --seed --force
+        run: php artisan migrate
 
       - name: Run tests
         run: php artisan test
