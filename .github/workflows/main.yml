@@ -28,8 +28,8 @@ jobs:
         - name: Install dependencies
           run: composer install --prefer-dist --no-progress
 
-        - name: Start MySQL and sleep
-          run: docker start mysql && sleep 30m
+        # - name: Start MySQL and sleep
+        #   run: docker start mysql && sleep 30m
 
         - name: Run Pest tests
           run: ./vendor/bin/pest
