@@ -8,9 +8,7 @@ jobs:
 
     services:
       mysql:
-        container_name: mysql-test
         image: mysql:latest
-        restart: always
         env:
           MYSQL_DATABASE: epsilon
           MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
