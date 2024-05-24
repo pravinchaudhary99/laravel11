@@ -10,7 +10,7 @@ jobs:
             mysql:
                 image: mysql:latest
                 env:
-                    MYSQL_DATABASE: epsilontile_testing
+                    MYSQL_DATABASE: testing
                     MYSQL_ROOT_PASSWORD: root
                 ports:
                     - 3306:3306
