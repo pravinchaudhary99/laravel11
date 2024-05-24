@@ -14,7 +14,9 @@ jobs:
           MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
         ports:
           - 3329:3306
-        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+        volumes:
+          - mysql:/var/lib/mysql
+          - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     steps:
       - name: Checkout code
@@ -27,31 +29,6 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-      
-      - name: Wait for MySQL to be healthy
-        run: |
-          echo "Waiting for MySQL to be healthy..."
-          for i in {1..30}; do
-            HEALTH_STATUS=$(docker inspect --format '{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}' ${{ job.services.mysql.id }})
-            echo "MySQL health status: $HEALTH_STATUS"
-            if [ "$HEALTH_STATUS" == "healthy" ]; then
-              echo "MySQL is healthy"
-              break
-            else
-              echo "MySQL is not healthy yet. Waiting..."
-              sleep 2
-            fi
-          done
-          if [ "$HEALTH_STATUS" != "healthy" ]; then
-            echo "MySQL failed to become healthy in time" >&2
-            exit 1
-          fi
-
-      - name: Initialize Database
-        run: |
-          echo "Initializing database..."
-          docker exec ${{ job.services.mysql.id }} sh -c 'exec mysql -u root -pwot-epsilon-test-2024 epsilon < /github/workspace/db/init.sql'
-          echo "Database initialized."
 
       - name: Run Pest tests
         run: ./vendor/bin/pest
