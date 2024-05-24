@@ -2,21 +2,18 @@ name: Unit Tests
 
 on: [pull_request]
 
-jobs:
-  tests:
+obs:
+  test:
     runs-on: ubuntu-latest
 
     services:
       mysql:
         image: mysql:latest
-        env:
-          MYSQL_DATABASE: epsilon
-          MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
         ports:
-          - 3329:3306
-        volumes:
-          - mysql:/var/lib/mysql
-          - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+          - 3329:3329
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: epsilon
 
     steps:
       - name: Checkout code
@@ -25,10 +22,48 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.1'
+          extensions: mbstring, mysqli, pdo_mysql
+          ini-values: post_max_size=256M, upload_max_filesize=256M
+          coverage: none
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
 
-      - name: Run Pest tests
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
+
+      - name: Set up testing database
+        run: |
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=192.168.1.102" >> .env
+          echo "DB_PORT=3329" >> .env
+          echo "DB_DATABASE=epsilon" >> .env
+          echo "DB_USERNAME=root" >> .env
+          echo "DB_PASSWORD=wot-epsilon-test-2024" >> .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Configure database
+        run: |
+          php artisan config:cache
+          php artisan migrate --force
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 192.168.1.102
+          DB_PORT: 3329
+          DB_DATABASE: epsilon
+          DB_USERNAME: root
+          DB_PASSWORD: wot-epsilon-test-2024
+
+      - name: Run tests
         run: ./vendor/bin/pest
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 192.168.1.102
+          DB_PORT: 3329
+          DB_DATABASE: epsilon
+          DB_USERNAME: root
+          DB_PASSWORD: wot-epsilon-test-2024
+
