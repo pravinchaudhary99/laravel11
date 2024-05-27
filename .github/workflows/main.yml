@@ -8,13 +8,14 @@ jobs:
 
     services:
       mysql:
-          image: mysql:latest
-          env:
-            MYSQL_DATABASE: epsilon
-            MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
-          ports:
-            - 3329:3306
-          options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        image: mysql:latest
+        env:
+          MYSQL_DATABASE: epsilon
+          MYSQL_ROOT_PASSWORD: wot-epsilon-test-2024
+        ports:
+          - 3329:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,5 +28,31 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            mysqladmin ping -h 192.168.1.102 -P 3329 --silent && echo "MySQL is up and running" && break
+            echo "Waiting..."
+            sleep 2
+          done
+
+      - name: Run database migrations
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 192.168.1.102
+          DB_PORT: 3329
+          DB_DATABASE: epsilon
+          DB_USERNAME: root
+          DB_PASSWORD: wot-epsilon-test-2024
+        run: php artisan migrate --force
+
       - name: Run Pest tests
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 192.168.1.102
+          DB_PORT: 3329
+          DB_DATABASE: epsilon
+          DB_USERNAME: root
+          DB_PASSWORD: wot-epsilon-test-2024
         run: ./vendor/bin/pest
