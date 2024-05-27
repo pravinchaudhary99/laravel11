@@ -6,25 +6,25 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:
-      DB_DATABASE: epsilontile_testing
-      DB_USER: root
-      DB_PASSWORD: root
+    # env:
+    #   DB_DATABASE: epsilontile_testing
+    #   DB_USER: root
+    #   DB_PASSWORD: root
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Start MySQL
-        run: |
-          sudo /etc/init.d/mysql start
-          echo "Waiting for MySQL to be ready..."
-          for i in {1..30}; do
-            mysqladmin ping --silent && echo "MySQL is up and running" && break
-            echo "Waiting..."
-            sleep 2
-          done
-           mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD
+      # - name: Start MySQL
+      #   run: |
+      #     sudo /etc/init.d/mysql start
+      #     echo "Waiting for MySQL to be ready..."
+      #     for i in {1..30}; do
+      #       mysqladmin ping --silent && echo "MySQL is up and running" && break
+      #       echo "Waiting..."
+      #       sleep 2
+      #     done
+      #      mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -34,10 +34,10 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Create database if it doesn't exist
-        if: steps.check_db.outputs.database_exists == 'false'
-        run: |
-          mysql -h"${DB_HOST}" -e "CREATE DATABASE ${DB_DATABASE}"
+      # - name: Create database if it doesn't exist
+      #   if: steps.check_db.outputs.database_exists == 'false'
+      #   run: |
+      #     mysql -h"${DB_HOST}" -e "CREATE DATABASE ${DB_DATABASE}"
 
       - name: Run database migrations
         run:  php artisan migrate --force --env=testing
