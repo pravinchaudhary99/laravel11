@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_DATABASE: epsilon
+      DB_DATABASE: epsilontile_testing
       DB_USER: root
-      DB_PASSWORD: wot-epsilon-test-2024
-      DB_HOST: 192.168.1.102
+      DB_PASSWORD: root
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -37,8 +37,8 @@ jobs:
       - name: Run database migrations
         env:
           DB_CONNECTION: mysql
-          DB_HOST: 192.168.1.102
-          DB_PORT: 3329
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
           DB_DATABASE: ${{ env.DB_DATABASE }}
           DB_USERNAME: ${{ env.DB_USER }}
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
@@ -47,8 +47,8 @@ jobs:
       - name: Run Pest tests
         env:
           DB_CONNECTION: mysql
-          DB_HOST: 192.168.1.102
-          DB_PORT: 3329
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
           DB_DATABASE: ${{ env.DB_DATABASE }}
           DB_USERNAME: ${{ env.DB_USER }}
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
