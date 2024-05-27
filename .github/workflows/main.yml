@@ -27,14 +27,5 @@ jobs:
       - name: Run database migrations
         run: php artisan migrate --force
 
-      - name: Wait for MySQL to be ready
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          for i in {1..30}; do
-            mysqladmin ping --host=${{ env.DB_HOST }} --port=${{ env.DB_PORT }} --user=${{ env.DB_USERNAME }} --password="${{ env.DB_PASSWORD }}" --silent && echo "MySQL is up and running" && break
-            echo "Waiting..."
-            sleep 2
-          done
-
       - name: Run Pest tests
         run: ./vendor/bin/pest
