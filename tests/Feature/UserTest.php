@@ -10,4 +10,5 @@ test('user create', function () {
     $response->assertStatus(200);
 
     expect(User::where('email', $user->email)->exists())->toBeTrue();
+    
 });
