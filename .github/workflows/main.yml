@@ -1,9 +1,6 @@
 name: Mysql Testing Database
 
-on:
-  push:
-    branches:
-      - main
+on: [pull_request]
 
 jobs:
   test:
