@@ -6,10 +6,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    - name: Copy .env.testing
+      run: cp .env.testing .env
+
     env:
-      DB_DATABASE: ${{ secrets.DB_DATABASE }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: ${{ env.DB_DATABASE }}
+      DB_USER: ${{ env.DB_USER }}
+      DB_PASSWORD: ${{ env.DB_PASSWORD }}
 
     steps:
       - name: Checkout code
@@ -37,14 +40,11 @@ jobs:
       - name: Copy .env.testing
         run: cp .env.testing .env
 
-      - name: Update DB_HOST
-        run: sed -i 's/DB_HOST=127.0.0.1/DB_HOST=192.168.1.102/g' .env
-
       - name: Run database migrations
         env:
           DB_CONNECTION: mysql
-          DB_HOST: 192.168.1.102
-          DB_PORT: 3329
+          DB_HOST: ${{ env.DB_HOST }}
+          DB_PORT: ${{ env.DB_PORT }}
           DB_DATABASE: ${{ env.DB_DATABASE }}
           DB_USERNAME: ${{ env.DB_USER }}
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
@@ -53,8 +53,8 @@ jobs:
       - name: Run Pest tests
         env:
           DB_CONNECTION: mysql
-          DB_HOST: 192.168.1.102
-          DB_PORT: 3329
+          DB_HOST: ${{ env.DB_HOST }}
+          DB_PORT: ${{ env.DB_PORT }}
           DB_DATABASE: ${{ env.DB_DATABASE }}
           DB_USERNAME: ${{ env.DB_USER }}
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
