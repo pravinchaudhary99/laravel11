@@ -10,11 +10,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Read .env.testing file and set database variables
-        id: env
+      # Step to print contents of .env.testing file for debugging
+      - name: Print contents of .env.testing file
+        run: cat .env.testing
+
+      # Step to set database variables from .env.testing file
+      - name: Set database variables from .env.testing file
         run: |
           echo "Reading .env.testing file..."
-          export $(grep -v '^#' .env.testing | xargs -d '\n')
+          source .env.testing
+          export DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD
+
+      # Step to print database connection details for debugging
+      - name: Print database connection details
+        run: |
+          echo "Database Connection: ${DB_CONNECTION}"
+          echo "Database Host: ${DB_HOST}"
+          echo "Database Port: ${DB_PORT}"
+          echo "Database Name: ${DB_DATABASE}"
+          echo "Database Username: ${DB_USERNAME}"
+          echo "Database Password: ${DB_PASSWORD}"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -28,20 +43,4 @@ jobs:
         run: php artisan migrate --force
 
       - name: Run Pest tests
-        run: ./vendor/bin/pest
-
-      - name: Print database details
-        run: |
-          echo "Database Connection: ${DB_CONNECTION}"
-          echo "Database Host: ${DB_HOST}"
-          echo "Database Port: ${DB_PORT}"
-          echo "Database Name: ${DB_DATABASE}"
-          echo "Database Username: ${DB_USERNAME}"
-          echo "Database Password: ${DB_PASSWORD}"
-        env:
-          DB_CONNECTION: ${{ env.DB_CONNECTION }}
-          DB_HOST: ${{ env.DB_HOST }}
-          DB_PORT: ${{ env.DB_PORT }}
-          DB_DATABASE: ${{ env.DB_DATABASE }}
-          DB_USERNAME: ${{ env.DB_USERNAME }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+        run: ENV=testing ./vendor/bin/pest
