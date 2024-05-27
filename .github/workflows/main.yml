@@ -36,16 +36,14 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Create Example Environment File
-        run: cp .env.example .env
-
-      - name: Populate Environment Variables
-        run: |
-          sed -i "s/DB_DATABASE_PLACEHOLDER/${DB_DATABASE}/g" .env
-          sed -i "s/DB_HOST_PLACEHOLDER/${DB_HOST}/g" .env
-          sed -i "s/DB_PORT_PLACEHOLDER/${DB_PORT}/g" .env
-          sed -i "s/DB_USERNAME_PLACEHOLDER/${DB_USERNAME}/g" .env
-          sed -i "s/DB_PASSWORD_PLACEHOLDER/${DB_PASSWORD}/g" .env
+      - name: Run database migrations
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 192.168.1.102
+          DB_PORT: 3329
+          DB_DATABASE: epsilon
+          DB_USERNAME: root
+          DB_PASSWORD: wot-epsilon-test-2024
 
       - name: Run database migrations
         run: php artisan migrate --force
