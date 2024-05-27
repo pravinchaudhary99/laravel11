@@ -8,7 +8,7 @@ jobs:
 
     env:
       DB_DATABASE: ${{ secrets.DB_DATABASE }}
-      DB_USER: ${{ secrets.DB_USER }}
+      DB_USER: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
