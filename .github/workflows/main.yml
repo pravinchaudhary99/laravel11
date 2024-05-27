@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_HOST: 192.168.1.102
       DB_DATABASE: epsilon
       DB_USER: root
       DB_PASSWORD: wot-epsilon-test-2024
@@ -21,11 +20,11 @@ jobs:
           sudo /etc/init.d/mysql start
           echo "Waiting for MySQL to be ready..."
           for i in {1..30}; do
-            mysqladmin ping --silent && echo "MySQL is up and running" && break
+            mysqladmin -h 192.168.1.102 -u root --password=root ping --silent && echo "MySQL is up and running" && break
             echo "Waiting..."
             sleep 2
           done
-          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD
+          mysql -h 192.168.1.102 -u root --password=root -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
