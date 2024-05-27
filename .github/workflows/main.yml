@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_DATABASE: ${{ secrets.DB_DATABASE }}
-      DB_USER: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DATABASE: epsilontile_testing
+      DB_USER: root
+      DB_PASSWORD: root
 
     steps:
       - name: Checkout code
@@ -44,3 +44,12 @@ jobs:
 
       - name: Run Pest tests
         run: ENV=testing ./vendor/bin/pest
+
+      - name: Echo environment variables
+        run: |
+          echo "Database Host: 127.0.0.1"
+          echo "Database Port: 3306"
+          echo "Database Name: ${{ secrets.DB_DATABASE }}"
+          echo "Database Username: ${{ secrets.DB_USERNAME }}"
+          # Note: Avoid printing the database password for security reasons
+          # echo "Database Password: ${{ secrets.DB_PASSWORD }}"
