@@ -37,9 +37,6 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Copy .env.testing
-        run: cp .env.testing .env
-
       - name: Run database migrations
         env:
           DB_CONNECTION: mysql
