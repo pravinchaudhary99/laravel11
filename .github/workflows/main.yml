@@ -10,32 +10,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create .env.testing file
-        run: |
-          echo "DB_CONNECTION=mysql" > .env.testing
-          echo "DB_HOST=192.168.1.102" >> .env.testing
-          echo "DB_PORT=3329" >> .env.testing
-          echo "DB_DATABASE=epsilon" >> .env.testing
-          echo "DB_USERNAME=root" >> .env.testing
-          echo "DB_PASSWORD=wot-epsilon-test-2024" >> .env.testing
-
       - name: Read .env.testing file and set database variables
         id: env
         run: |
           echo "Reading .env.testing file..."
           export $(grep -v '^#' .env.testing | xargs -d '\n')
-
-      - name: Start MySQL
-        run: sudo /etc/init.d/mysql start
-
-      - name: Wait for MySQL to be ready
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          for i in {1..30}; do
-            mysqladmin ping --host=${{ env.DB_HOST }} --port=${{ env.DB_PORT }} --user=${{ env.DB_USERNAME }} --password="${{ env.DB_PASSWORD }}" --silent && echo "MySQL is up and running" && break
-            echo "Waiting..."
-            sleep 2
-          done
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -47,6 +26,15 @@ jobs:
 
       - name: Run database migrations
         run: php artisan migrate --force
+
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            mysqladmin ping --host=${{ env.DB_HOST }} --port=${{ env.DB_PORT }} --user=${{ env.DB_USERNAME }} --password="${{ env.DB_PASSWORD }}" --silent && echo "MySQL is up and running" && break
+            echo "Waiting..."
+            sleep 2
+          done
 
       - name: Run Pest tests
         run: ./vendor/bin/pest
