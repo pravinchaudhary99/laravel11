@@ -10,7 +10,7 @@ jobs:
       DB_DATABASE: epsilon
       DB_USER: root
       DB_PASSWORD: wot-epsilon-test-2024
-
+      DB_HOST: 192.168.1.102
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
