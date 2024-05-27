@@ -32,10 +32,18 @@ jobs:
         run: |
           echo "Waiting for MySQL to be ready..."
           for i in {1..30}; do
-            mysqladmin ping -h 192.168.1.102 -P 3329 --silent && echo "MySQL is up and running" && break
+            if mysqladmin ping -h 192.168.1.102 -P 3329 --silent; then
+              echo "MySQL is up and running"
+              break
+            fi
             echo "Waiting..."
             sleep 2
           done
+
+      - name: Debug MySQL Connection
+        run: |
+          echo "Testing MySQL connection..."
+          mysql -h 192.168.1.102 -P 3329 -u root -pwot-epsilon-test-2024 -e "SHOW DATABASES;"
 
       - name: Run database migrations
         env:
