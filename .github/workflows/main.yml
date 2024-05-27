@@ -7,41 +7,48 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+      DB_DATABASE: epsilontile_testing
+      DB_USER: root
+      DB_PASSWORD: root
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create .env.testing file
+      - name: Start MySQL
         run: |
-          echo "DB_CONNECTION=mysql" > .env.testing
-          echo "DB_HOST=localhost" >> .env.testing
-          echo "DB_PORT=3306" >> .env.testing
-          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env.testing
-          echo "DB_USERNAME=root" >> .env.testing
-          echo "DB_PASSWORD=root" >> .env.testing
-
-      - name: Wait for MySQL to be ready
-        run: |
+          sudo /etc/init.d/mysql start
           echo "Waiting for MySQL to be ready..."
           for i in {1..30}; do
             mysqladmin ping --silent && echo "MySQL is up and running" && break
             echo "Waiting..."
             sleep 2
           done
-
+          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-       - name: Install dependencies
+      - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
       - name: Run database migrations
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: ${{ env.DB_DATABASE }}
+          DB_USERNAME: ${{ env.DB_USER }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
         run: php artisan migrate --force
 
       - name: Run Pest tests
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: ${{ env.DB_DATABASE }}
+          DB_USERNAME: ${{ env.DB_USER }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
         run: ./vendor/bin/pest
