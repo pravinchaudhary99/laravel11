@@ -6,25 +6,37 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:
-      DB_DATABASE: epsilontile_testing
-      DB_USER: root
-      DB_PASSWORD: root
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Start MySQL
+      - name: Create .env.testing file
         run: |
-          sudo /etc/init.d/mysql start
+          echo "DB_CONNECTION=mysql" > .env.testing
+          echo "DB_HOST=192.168.1.102" >> .env.testing
+          echo "DB_PORT=3329" >> .env.testing
+          echo "DB_DATABASE=epsilon" >> .env.testing
+          echo "DB_USERNAME=root" >> .env.testing
+          echo "DB_PASSWORD=wot-epsilon-test-2024" >> .env.testing
+
+      - name: Read .env.testing file and set database variables
+        id: env
+        run: |
+          echo "Reading .env.testing file..."
+          export $(grep -v '^#' .env.testing | xargs -d '\n')
+
+      - name: Start MySQL
+        run: sudo /etc/init.d/mysql start
+
+      - name: Wait for MySQL to be ready
+        run: |
           echo "Waiting for MySQL to be ready..."
           for i in {1..30}; do
-            mysqladmin ping --silent && echo "MySQL is up and running" && break
+            mysqladmin ping --host=$DB_HOST --port=$DB_PORT --user=$DB_USERNAME --password=$DB_PASSWORD --silent && echo "MySQL is up and running" && break
             echo "Waiting..."
             sleep 2
           done
-          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -34,21 +46,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Run database migrations
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: ${{ env.DB_DATABASE }}
-          DB_USERNAME: ${{ env.DB_USER }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
         run: php artisan migrate --force
 
       - name: Run Pest tests
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: ${{ env.DB_DATABASE }}
-          DB_USERNAME: ${{ env.DB_USER }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
         run: ./vendor/bin/pest
