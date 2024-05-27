@@ -17,32 +17,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step to print contents of .env.testing file for debugging
-      - name: Print contents of .env.testing file
-        run: cat .env.testing
-
-      # Step to set database variables from .env.testing file
-      - name: Set database variables from .env.testing file
-        run: |
-          echo "Reading .env.testing file..."
-          source .env.testing
-
-      # Step to print database connection details for debugging
-      - name: Print database connection details
-        run: |
-          echo "Database Connection: ${DB_CONNECTION}"
-          echo "Database Host: ${DB_HOST}"
-          echo "Database Port: ${DB_PORT}"
-          echo "Database Name: ${DB_DATABASE}"
-          echo "Database Username: ${DB_USERNAME}"
-          echo "Database Password: ${DB_PASSWORD}"
-
       # Step to check if the database exists and create it if necessary
       - name: Check if database exists
         id: check_db
         run: |
           # Check if the database exists
-          if mysql -h$DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -e "use $DB_DATABASE"; then
+          if mysql -h localhost -u root -p root -e "use epsilontile_testing"; then
             echo "Database exists"
             echo "database_exists=true" >> $GITHUB_ENV
           else
@@ -62,7 +42,7 @@ jobs:
         if: steps.check_db.outputs.database_exists == 'false'
         run: |
           # Create the database
-          mysql -h$DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -e "CREATE DATABASE $DB_DATABASE"
+          mysql mysql -h localhost -u root -p root -e "CREATE DATABASE epsilontile_testing"
 
       - name: Run database migrations
         run: php artisan migrate --force
