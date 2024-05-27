@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_DATABASE: epsilontile_testing
-      DB_USER: root
-      DB_PASSWORD: root
+      DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      DB_USER: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - name: Checkout code
