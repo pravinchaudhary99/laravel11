@@ -27,9 +27,6 @@ jobs:
       - name: Run database migrations
         run: php artisan migrate --force
 
-      - name: Run Pest tests
-        run: ./vendor/bin/pest
-
       - name: Print database details
         run: |
           echo "Database Connection: ${DB_CONNECTION}"
@@ -45,3 +42,7 @@ jobs:
           DB_DATABASE: ${{ env.DB_DATABASE }}
           DB_USERNAME: ${{ env.DB_USERNAME }}
           DB_PASSWORD: ${{ env.DB_PASSWORD }}
+          
+      - name: Run Pest tests
+        run: ENV=testing ./vendor/bin/pest
+
