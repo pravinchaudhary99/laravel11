@@ -18,6 +18,14 @@ class RoleAndPermissionSeeder extends Seeder
         'role-create',
         'role-edit',
         'role-delete',
+        'language-list',
+        'language-create',
+        'language-edit',
+        'language-delete',
+        'translate-list',
+        'translate-create',
+        'translate-edit',
+        'translate-delete',
     ];
 
     public function run()
