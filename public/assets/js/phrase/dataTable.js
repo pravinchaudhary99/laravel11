@@ -1,7 +1,7 @@
 var LanguageList = function() {
     var initTable = function() {
-        var table = $('#languageListTable');
-
+        var table = $('#translationListTable');
+        var id = table.attr('data-id');
         // begin first table
         datatable = table.DataTable({
             scrollX: true,
@@ -10,29 +10,20 @@ var LanguageList = function() {
             serverSide: true,
             order: [1, 'asc'],
             ajax: {
-                url: '/translations/list',
+                url: '/translations/phrases/list/'+id,
                 type: 'post',
+                data: function(d) {
+                    d.file = $('select[data-kt-translate-table-filter="file"]').val();
+                    d.status = $('select[data-kt-translate-table-filter="status"]').val();
+                },
                 error: function(response, textStatus, errorThrown) {
                     toastr.error(response.responseJSON.message ?? response.responseJSON.errors);
                 }
             },
             columns: [
                 { data: 'id', orderable: false, },
-                { data: 'language_name' },
-                {   data: 'phrases_count',
-                    orderable: false,
-                    render: function(data, type, full) {
-                        if(full.language.code == 'en') {
-                            return data + ' source keys';
-                        }
-                        var progress = parseInt(full.progress ?? 0);
-                       
-                        var line = `<div class="progress h-5px w-100">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: ${progress}%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>`;
-                        return line;
-                    }
-                },
+                { data: 'key' },
+                { data: 'value' },
                 { data: 'id'},
             ],
             columnDefs: [{
@@ -48,13 +39,8 @@ var LanguageList = function() {
                 orderable: false,
                 className: 'text-center',
                 render: function(data, type, full, meta) {
-                   
-                    if(full.language.code == 'en') {
-                        return '-';
-                    }
                     var action = `
-                    <a href="/translations/phrases/${data}" class="btn btn-icon view-role" title="edit translation" data-id="${data}"><i class="la fs-2 text-opacity-75 la-plus"></i></a>
-                    <a href="javascript:void(0)" class="btn btn-icon view-role deleteTranslation" title="delete translation" data-id="${data}"><i class="la fs-2 text-opacity-75 la-trash"></i></a>`
+                    <a href="javascript:void(0);" class="btn btn-icon editTranslationButton" title="edit translation" data-id="${data}" data-key="${full.key}" data-value="${full.value ?? ''}"><i class="la fs-2 text-opacity-75 la-edit"></i></a>`;
                     return action;
                 }
 
@@ -63,9 +49,13 @@ var LanguageList = function() {
     };
 
     var handleSearchDatatable = () => {
-        const filterSearch = document.querySelector('[data-kt-language-table-filter="search"]');
+        const filterSearch = document.querySelector('[data-kt-translate-table-filter="search"]');
         filterSearch.addEventListener('keyup', function(e) {
             datatable.search(e.target.value).draw();
+        });
+
+        $(document).on('change', 'select[data-kt-translate-table-filter="file"], select[data-kt-translate-table-filter="status"]', function() {
+            datatable.ajax.reload();
         });
     }
 
@@ -107,6 +97,19 @@ var LanguageList = function() {
                 });
             }
         })
+    });
+
+
+    $(document).on('click', '.editTranslationButton', function(e) {
+        e.preventDefault();
+        var key = $(this).attr('data-key');
+        var value = $(this).attr('data-value') ?? '';
+        var id = $(this).attr('data-id');
+
+        $("#update_translation_value").modal("show");
+        $(document).find("#englishValue").text(key);
+        $(document).find("#translationValue").val(value);
+        $(document).find("#translationFormSubmit").attr('data-id', id);
     });
 
     var handleForm = function() {

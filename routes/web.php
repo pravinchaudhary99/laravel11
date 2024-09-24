@@ -1,9 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PhraseController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\TranslationController;
 
@@ -25,4 +24,14 @@ Route::prefix('roles')->as('roles.')->middleware('auth')->group(function() {
 Route::prefix('translations')->as('translations.')->middleware('auth')->group(function() {
     Route::get('/', [TranslationController::class, 'index'])->name('index');
     Route::post('/list', [TranslationController::class, 'list'])->name('list');
+    Route::post('/store', [TranslationController::class, 'store'])->name('store');
+
+    Route::delete('/destroy/{id}', [TranslationController::class, 'destroy'])->name('destroy');
+
+    Route::prefix('phrases')->as('phrases.')->group(function() {
+        Route::get('/{id}', [PhraseController::class, 'index'])->name('index');
+        Route::post('/list/{id}', [PhraseController::class, 'list'])->name('list');
+
+        Route::post('/update/{id}', [PhraseController::class, 'update'])->name('update');
+    });
 });

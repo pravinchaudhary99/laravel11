@@ -39,7 +39,7 @@ class Translation extends Model
     {
         $query->addSelect([
             'progress' => Phrase::selectRaw('COUNT(CASE WHEN value IS NOT NULL THEN 1 END) / COUNT(*) * 100')
-                ->whereColumn('ltu_phrases.translation_id', 'ltu_translations.id')
+                ->whereColumn('phrases.translation_id', 'translations.id')
                 ->limit(1),
         ])->withCasts([
             'progress' => 'decimal:1',

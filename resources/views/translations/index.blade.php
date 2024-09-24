@@ -68,7 +68,7 @@
                         <!--begin::Toolbar-->
                         <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
                             <!--begin::Add user-->
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_add_language">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#update_translation_value">
                             <!--begin::Svg Icon | path: icons/duotune/arrows/arr075.svg-->
                             <span class="svg-icon svg-icon-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -88,13 +88,13 @@
                         </div>
                         <!--end::Group actions-->
                         <!--begin::Modal - Add task-->
-                        <div class="modal fade" id="kt_modal_add_language" tabindex="-1" aria-hidden="true">
+                        <div class="modal fade" id="update_translation_value" tabindex="-1" aria-hidden="true">
                             <!--begin::Modal dialog-->
                             <div class="modal-dialog modal-dialog-centered mw-650px">
                                 <!--begin::Modal content-->
                                 <div class="modal-content">
                                     <!--begin::Modal header-->
-                                    <div class="modal-header" id="kt_modal_add_language_header">
+                                    <div class="modal-header" id="update_translation_value_header">
                                         <!--begin::Modal title-->
                                         <h2 class="fw-bolder">Add Language</h2>
                                         <!--end::Modal title-->
@@ -117,14 +117,14 @@
                                         <!--begin::Form-->
                                         <form id="add_language_form" class="form">
                                             <!--begin::Scroll-->
-                                            <div class="d-flex flex-column scroll-y me-n7 pe-7" id="kt_modal_add_language_scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_language_header" data-kt-scroll-wrappers="#kt_modal_add_language_scroll" data-kt-scroll-offset="300px">
+                                            <div class="d-flex flex-column scroll-y me-n7 pe-7" id="update_translation_value_scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#update_translation_value_header" data-kt-scroll-wrappers="#update_translation_value_scroll" data-kt-scroll-offset="300px">
                                                 <!--begin::Input group-->
                                                 <div class="fv-row mb-7">
                                                     <!--begin::Label-->
                                                     <label class="required fw-bold fs-6 mb-2">Select Language</label>
                                                     <!--end::Label-->
                                                     @isset($languages)
-                                                    <select name="language" aria-label="Select a language" data-control="select2" data-placeholder="Select a Language..." class="form-select form-select-solid" id="languageSelect" data-dropdown-parent="#kt_modal_add_language">
+                                                    <select name="language" aria-label="Select a language" data-control="select2" data-placeholder="Select a Language..." class="form-select form-select-solid" id="languageSelect" data-dropdown-parent="#update_translation_value">
                                                         <option value="">Select a language</option>
                                                         @foreach($languages as $language)
                                                             <option value="{{ $language->id }}">{{ $language->name ?? '-' }}</option>
