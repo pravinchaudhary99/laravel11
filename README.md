@@ -38,6 +38,7 @@ To import your translations, run the following command:
 
 ```bash
 php artisan translations:import
+composer require stichoza/google-translate-php
 ```
 
 ### Serve Project

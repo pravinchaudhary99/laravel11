@@ -49,4 +49,19 @@ class PhraseController extends Controller
             return response()->json(['errors', $e->getMessage()], 500);
         }
     }
+
+    public function translate($id) {
+        try {
+            $responses = $this->repo->translate($id);
+
+            if(!$responses['success']) {
+                return response()->json(['errors', 'Phrases data not fount'], 500);
+            }
+
+            $data = $responses['data'];
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json(['errors', $e->getMessage()], 500);
+        }
+    }
 }

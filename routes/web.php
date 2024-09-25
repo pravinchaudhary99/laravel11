@@ -33,5 +33,6 @@ Route::prefix('translations')->as('translations.')->middleware('auth')->group(fu
         Route::post('/list/{id}', [PhraseController::class, 'list'])->name('list');
 
         Route::post('/update/{id}', [PhraseController::class, 'update'])->name('update');
+        Route::post('/translate/{id}', [PhraseController::class, 'translate'])->name('translate');
     });
 });

@@ -24,7 +24,7 @@ var LanguageList = function() {
                 { data: 'id', orderable: false, },
                 { data: 'key' },
                 { data: 'value' },
-                { data: 'id'},
+                { data: 'uuid'},
             ],
             columnDefs: [{
                 targets: 0,
@@ -40,7 +40,7 @@ var LanguageList = function() {
                 className: 'text-center',
                 render: function(data, type, full, meta) {
                     var action = `
-                    <a href="javascript:void(0);" class="btn btn-icon editTranslationButton" title="edit translation" data-id="${data}" data-key="${full.key}" data-value="${full.value ?? ''}"><i class="la fs-2 text-opacity-75 la-edit"></i></a>`;
+                    <a href="javascript:void(0);" class="btn btn-icon editTranslationButton" title="edit translation" data-id="${data}" data-key="${full.enValue}" data-value="${full.value ?? ''}"><i class="la fs-2 text-opacity-75 la-edit"></i></a>`;
                     return action;
                 }
 
@@ -59,69 +59,55 @@ var LanguageList = function() {
         });
     }
 
-    $("#languageSelect").select2();
 
-    $("div[language-modal-action='close'], button[language-modal-action='cancel']").on("click", function(e) {
-        $("#add_language_form").trigger("reset");
-        $("#languageSelect").val(null).trigger("change");
-        $("#kt_modal_add_language").modal("hide");
+    $("div[translation-modal-action='close'], button[translation-modal-action='cancel']").on("click", function(e) {
+        $("#update_translation_value_form").trigger("reset");
+        $("#update_translation_value").modal("hide");
     });
-
-    $(document).on('click', 'a.deleteTranslation', function() {
-        var deleteId = $(this).attr('data-id');
-
-        Swal.fire({
-            text: "Are you sure you want to delete translation?",
-            icon: "warning",
-            showCancelButton: true,
-            buttonsStyling: false,
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
-            showCloseButton: true,
-            customClass: {
-                confirmButton: "btn btn-primary",
-                cancelButton: "btn btn-light"
-            }
-        }).then(function(result) {
-            if (result.value) {
-                $.ajax({
-                    method: "DELETE",
-                    url: '/translations/destroy/' + deleteId,
-                    success: function(response) {
-                        toastr.success(response.message ?? 'Translation has been deleted successfully');
-                        datatable.ajax.reload(null, false);
-                    },
-                    error: function(response) {
-                        toastr.error(response.responseJSON.error ?? 'something went wrong');
-                    }
-                });
-            }
-        })
-    });
-
 
     $(document).on('click', '.editTranslationButton', function(e) {
         e.preventDefault();
-        var key = $(this).attr('data-key');
-        var value = $(this).attr('data-value') ?? '';
-        var id = $(this).attr('data-id');
+        const key = $(this).attr('data-key');
+        const value = $(this).attr('data-value') ?? '';
+        const id = $(this).attr('data-id');
 
-        $("#update_translation_value").modal("show");
-        $(document).find("#englishValue").text(key);
-        $(document).find("#translationValue").val(value);
-        $(document).find("#translationFormSubmit").attr('data-id', id);
+        const modal = $("#update_translation_value");
+        modal.find("#englishValue").text(key);
+        modal.find("#translationValue").val(value);
+        modal.find("#translationFormSubmit").attr('data-id', id)
+        
+        $.ajax({
+            method: 'POST',
+            url: '/translations/phrases/translate/'+id,
+            data: { 'key': key},
+            success: function(response) {
+                modal.find(".translatedValue").text(response.translated || ''); 
+                modal.modal('show');
+            }
+        });
+    });
+
+    $(document).on('click', '#copyButton', function() {
+        var textToCopy = $(document).find(".translatedValue").text();
+        
+        if (textToCopy) {
+            navigator.clipboard.writeText(textToCopy);
+            $(document).find("#translationValue").val(textToCopy)
+        } else {
+            console.log('No text to copy.');
+        }
     });
 
     var handleForm = function() {
         // Initialize form validation
-        var formElement = document.getElementById('add_language_form');
+        var formElement = document.getElementById('update_translation_value_form');
         var validator = FormValidation.formValidation(
             formElement, {
                 fields: {
-                    'language': {
+                    'value': {
                         validators: {
                             notEmpty: {
-                                message: 'Language name is required' // Updated message
+                                message: 'Translate value is required'
                             },
                         }
                     },
@@ -137,21 +123,22 @@ var LanguageList = function() {
             }
         );
     
-        document.getElementById("languageFormSubmit").addEventListener("click", function(e) {
+        document.getElementById("translationFormSubmit").addEventListener("click", function(e) {
             e.preventDefault();
-            var language = $("select[name=language] option:selected").val();
+            var value = $("#translationValue").val();
+            var id = $("#translationFormSubmit").attr("data-id");
             if (validator) {
                 validator.validate().then(function(status) {
                     if (status === 'Valid') {
                        $.ajax({
                             method: "POST",
-                            url: "/translations/store",
-                            data: { "language" : language},
+                            url: "/translations/phrases/update/"+id,
+                            data: { "value" : value},
                             success: function(response) {
                                 if(response.success) {
                                     toastr.success(response.message ?? 'CHA created successfully')
                                 }
-                                $("#kt_modal_add_language").modal('hide');
+                                $("#update_translation_value").modal('hide');
                                 datatable.ajax.reload(null, false);
                             },
                             error: function(response) {
@@ -167,6 +154,11 @@ var LanguageList = function() {
             }
         });
     };
+
+    $("div[language-modal-action='close'], button[language-modal-action='cancel']").on("click", function(e) {
+        $("#update_translation_value_form").trigger("reset");
+        $("#update_translation_value").modal("hide");
+    });
 
     function getErrorMessage(response) {
         if (!response || !response.responseJSON) {

@@ -9,5 +9,7 @@ interface PhraseInterface
     public function list($id);
 
     public function update($id);
+
+    public function translate($id);
 }
 

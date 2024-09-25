@@ -1,5 +1,7 @@
 <?php
 
+use Stichoza\GoogleTranslate\GoogleTranslate;
+
 if (! function_exists('getPhraseParameters')) {
     function getPhraseParameters(string $phrase): ?array
     {
@@ -10,5 +12,15 @@ if (! function_exists('getPhraseParameters')) {
         }
 
         return $matches[1];
+    }
+}
+
+if(! function_exists('translate')) {
+    function translate($sourceLang, $targetLang, $text) {
+        return (new GoogleTranslate())
+            ->preserveParameters()
+            ->setSource($sourceLang)
+            ->setTarget($targetLang)
+            ->translate($text);
     }
 }

@@ -46,6 +46,7 @@ class PhraseRepository implements PhraseInterface
         $status = $this->request->status ?? null;
 
         $translation = Translation::find($id);
+        $sourceTranslation = Translation::where('source', true)->first();
 
         $phrases = $translation->phrases()->newQuery();
 
@@ -73,7 +74,12 @@ class PhraseRepository implements PhraseInterface
 
         $recordsFiltered = $phrases->count();
 
-        $phrases = $phrases->orderBy('key', $direction)->skip($skip)->take($take)->get();
+        $phrases = $phrases->orderBy('key', $direction)->skip($skip)->take($take)->get()
+                ->map(function($query) use($translation, $sourceTranslation) {
+                    $enValue = $sourceTranslation->phrases()->where('key', $query->key)->value('value');
+                    $query->enValue = $enValue;
+                    return $query;
+                });
         
         $this->responsesData['data'] = [
             'data' => isset($phrases) ? $phrases : [],
@@ -84,11 +90,28 @@ class PhraseRepository implements PhraseInterface
     }
 
     public function update($id) {
-        $phrase = Phrase::find($id);
+        $phrase = Phrase::where( 'uuid', $id)->first();
         $value = $this->request->value;
 
         $phrase->update(['value' => $value]);
         $this->responsesData['success'] = true;
+        return $this->responsesData;
+    }
+
+    public function translate($id) {
+        $sourceTranslation = Translation::where('source', true)->first();
+        $phrase = Phrase::where( 'uuid', $id)->first();
+        $key = $this->request->key;
+
+        if(!$phrase){
+            $this->responsesData['success'] = false;
+            return $this->responsesData;
+        }
+
+        $translatedValue = translate($sourceTranslation->language->code, $phrase->translation->language->code, $key);
+
+        $this->responsesData['success'] = true;
+        $this->responsesData['data'] = ["translated" => $translatedValue];
         return $this->responsesData;
     }
 }
